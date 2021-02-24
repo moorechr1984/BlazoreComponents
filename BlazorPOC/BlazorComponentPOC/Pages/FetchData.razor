@@ -1,0 +1,23 @@
+﻿@page "/editable-grid"
+
+@using BlazorComponentPOC.Data
+@using BlazorComponentPOC.Components
+
+@inject WeatherForecastService ForecastService
+@inject StoreOrderService _storeOrderService
+
+<h1>Editable Grid Demo</h1>
+
+<EditableGridComponent Rows="@StoreOrders">
+
+</EditableGridComponent>
+
+
+@code { 
+
+    public List<StoreOrder> StoreOrders { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        StoreOrders = await _storeOrderService.GeStoreOrders();
+    }
+}

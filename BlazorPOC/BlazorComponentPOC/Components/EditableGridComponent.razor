@@ -1,0 +1,296 @@
+﻿@typeparam TRow
+
+
+<h3>Editable Grid Component</h3>
+
+<table class="table table-bordered table-hover">
+
+    @if (isLoading)
+    {
+        <tbody>
+            <tr>
+                <td>
+                    Loading...
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    }
+    else
+    {
+        <thead>
+            <tr>
+                @{
+                    <th scope="col">#</th>
+                    if (ColumnNames != null)
+                    {
+                        foreach (var columName in ColumnNames?.OrderBy(x => x.Key))
+                        {
+                            <th scope="col">
+                                @columName.Value
+                            </th>
+                        }
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (TransformedRows?.Any() == true)
+            {
+                var counter = 0;
+                @foreach (var row in TransformedRows?.OrderBy(x => x.Key))
+                {
+                    <tr>
+                        @{
+                            <th scope="row">@counter</th>
+                            foreach (var column in row.Value.OrderBy(x => x.Key))
+                            {
+
+                                <td>
+                                    <input type="text" value="@column.Value" class="form-control" disabled="@readonlyControl" />
+                                </td>
+                            }
+                            counter++;
+                        }
+                    </tr>
+                            }
+                            }
+            <tr>
+                @{
+
+                    int colspan = 0;
+                    if (ColumnNames.Count % 2 == 0)
+                    {
+                        colspan = ColumnNames.Count / 2;
+                    }
+                    else
+                    {
+                        colspan = ColumnNames.Count - 1 % 2;
+                    }
+
+                }
+
+                <td colspan="@colspan">
+                    @{
+                        if (btnEditGridComponent_Edit_Disabled == null)
+                        {
+                            <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
+                        }
+                    }
+                    @{
+                        if (btnEditGridComponent_Save_Disabled == null)
+                        {
+                            <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
+                        }
+                    }
+                </td>
+                <td colspan="@colspan">
+                    <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
+                </td>
+            </tr>
+        </tbody>
+    }
+
+</table>
+
+<div class="modal" tabindex="-1" role="dialog" id="editGridComponent_SaveConfirmModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Save Changes?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to save your changes?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#exampleModal" data-dismiss="modal" @onclick="OnClick_btnEditGridComponent_Save">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="editGridComponent_CancelConfirmModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Changes?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to clear your changes?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-toggle="modal" id="editGridComponent_CancelConfirmModal_btnCancel" @onclick="OnClick_btnEditGridComponent_Cancel" data-dismiss="modal">Clear changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+
+    [Parameter]
+    public List<TRow> Rows { get; set; }
+
+    public Dictionary<int, string>
+        ColumnNames
+    { get; set; }
+
+    public Dictionary<int, object>
+        ColumnValues
+    { get; set; }
+
+    public Dictionary<int, Dictionary<int, object>> TransformedRows { get; set; }
+
+    public List<TRow> RowsToBeUsed { get; set; }
+
+    public string btnEditGridComponent_Edit_Disabled { get; set; }
+
+    public string btnEditGridComponent_Save_Disabled { get; set; }
+
+    public string btnEditGridComponent_Cancel_Disabled { get; set; } = "disabled";
+
+    public bool readonlyControl { get; set; }
+    public bool isLoading { get; set; } = true;
+
+
+
+    public async Task<Dictionary<int, string>> GetColumnsFromRows()
+    {
+        return await Task.Factory.StartNew<Dictionary<int, string>>(() =>
+        {
+            foreach (var row in Rows)
+            {
+                var rowProperties = row.GetType().GetProperties();
+
+                foreach (var rowProperty in rowProperties)
+                {
+                    var columns = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>();
+
+                    if (ColumnNames == null)
+                    {
+                        ColumnNames = new Dictionary<int, string>();
+                    }
+
+                    if (!ColumnNames.ContainsKey(columns.First().GetPosition()))
+                    {
+                        ColumnNames.Add(columns.First().GetPosition(), columns.First().GetColumnName());
+                    }
+                }
+
+            }
+            return ColumnNames;
+        });
+    }
+
+
+    public async Task<Dictionary<int, Dictionary<int, object>>> GetRows()
+    {
+        return await Task.Factory.StartNew<Dictionary<int, Dictionary<int, object>>>(() =>
+        {
+            int rowCounter = 1;
+            foreach (var row in Rows)
+            {
+                var rowProperties = row.GetType().GetProperties();
+
+                foreach (var rowProperty in rowProperties)
+                {
+                    if (ColumnValues == null)
+                    {
+                        ColumnValues = new Dictionary<int, object>();
+                    }
+
+
+                    if (rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().Any())
+                    {
+                        var column = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().First();
+                        if (!ColumnValues.ContainsKey(column.GetPosition()))
+                        {
+                            ColumnValues.Add(column.GetPosition(), rowProperty.GetValue(row));
+                        }
+                    }
+                }
+                if (TransformedRows == null)
+                {
+                    TransformedRows = new Dictionary<int, Dictionary<int, object>>();
+                };
+                var copiedColumnValue = ColumnValues;
+                if (!TransformedRows.ContainsKey(rowCounter))
+                {
+                    TransformedRows.Add(rowCounter, copiedColumnValue);
+
+                    rowCounter++;
+                    ColumnValues = null;
+                }
+            }
+
+            return TransformedRows;
+        });
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        InitializeComponent();
+    }
+
+    private void OnClick_btnEditGridComponent_Edit(MouseEventArgs args)
+    {
+        btnEditGridComponent_Edit_Disabled = "disabled";
+        btnEditGridComponent_Save_Disabled = null;
+        btnEditGridComponent_Cancel_Disabled = null;
+        readonlyControl = false;
+        StateHasChanged();
+    }
+
+    private void OnClick_btnEditGridComponent_Save()
+    {
+        btnEditGridComponent_Edit_Disabled = null;
+        btnEditGridComponent_Save_Disabled = "disabled";
+        btnEditGridComponent_Cancel_Disabled = "disabled";
+        readonlyControl = readonlyControl;
+        StateHasChanged();
+    }
+
+    public void OnClick_btnEditGridComponent_Cancel(MouseEventArgs args)
+    {
+        btnEditGridComponent_Edit_Disabled = null;
+        btnEditGridComponent_Save_Disabled = "disabled";
+        btnEditGridComponent_Cancel_Disabled = "disabled";
+        readonlyControl = true;
+        InitializeComponent();
+    }
+
+    private async Task InitializeComponent()
+    {
+        readonlyControl = true;
+        btnEditGridComponent_Edit_Disabled = null;
+        isLoading = true;
+        StateHasChanged();
+        await GetColumnsFromRows();
+        try
+        {
+
+            await GetRows();
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+}
+
