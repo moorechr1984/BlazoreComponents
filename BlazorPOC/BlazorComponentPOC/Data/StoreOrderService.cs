@@ -7,27 +7,26 @@ namespace BlazorComponentPOC.Data
 {
     public class StoreOrderService
     {
-        private List<StoreOrder> _cache = new List<StoreOrder>
+        private List<ProductListRow> _cache = new List<ProductListRow>();
+        public Task<List<ProductListRow>> GetStoreOrders()
         {
-            new StoreOrder
+            for(int i=0; i<=25; i++)
             {
-                UnitId = 42,
-                OrderDate = DateTime.Now,
-                ProductId = 519933,
-                RequestedQuantity = 1
-            }
-        };
-
-        public Task<List<StoreOrder>> GeStoreOrders()
-        {
-            for(int i=0; i<=100; i++)
-            {
-                _cache.Add(new StoreOrder
+                _cache.Add(new ProductListRow
                 {
-                    UnitId = i,
+                    UnitId = 42,
                     OrderDate = DateTime.Now,
                     ProductId = 519933,
-                    RequestedQuantity = 1 + i
+                    BalanceOnHand = 300,
+                    CasepackFlag = "Y",
+                    DfToDFTransferQuantity = 234,
+                    ItemStatus = "TEST",
+                    MeijerItemCode = "202252",
+                    PackQuantity = 12,
+                    ProductDescription = "Bananas",
+                    PromoStoreNumber = 163,
+                    PromotionType = "Promo Type"
+
                 });
             }
             return Task.FromResult(_cache);

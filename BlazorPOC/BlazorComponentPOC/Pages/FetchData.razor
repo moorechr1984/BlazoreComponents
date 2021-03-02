@@ -8,16 +8,16 @@
 
 <h1>Editable Grid Demo</h1>
 
-<EditableGridComponent Rows="@StoreOrders">
+<EditableGridComponent Datasource="@StoreOrders">
 
 </EditableGridComponent>
 
 
 @code { 
 
-    public List<StoreOrder> StoreOrders { get; set; }
+    public List<ProductListRow> StoreOrders { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        StoreOrders = await _storeOrderService.GeStoreOrders();
+        StoreOrders = await _storeOrderService.GetStoreOrders();
     }
 }

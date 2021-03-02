@@ -1,103 +1,177 @@
 ﻿@typeparam TRow
 
+<style>
+    table {
+        width: 100%;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .oi-plus{
+        fill:green
+    }
+</style>
 
 <h3>Editable Grid Component</h3>
 
-<table class="table table-bordered table-hover">
+@*<table  table-container*@
 
-    @if (isLoading)
-    {
-        <tbody>
-            <tr>
-                <td>
-                    Loading...
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    }
-    else
-    {
-        <thead>
-            <tr>
-                @{
-                    <th scope="col">#</th>
-                    if (ColumnNames != null)
-                    {
-                        foreach (var columName in ColumnNames?.OrderBy(x => x.Key))
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-responsive">
+
+        @if (isLoading)
+        {
+            <tbody>
+                <tr>
+                    <td>
+                        Loading...
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        }
+        else
+        {
+            <thead>
+                <tr>
+                    @{
+                        <th scope="col"></th>
+                        if (ColumnNames != null)
                         {
-                            <th scope="col">
-                                @columName.Value
-                            </th>
-                        }
-                    }
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @if (TransformedRows?.Any() == true)
-            {
-                var counter = 0;
-                @foreach (var row in TransformedRows?.OrderBy(x => x.Key))
-                {
-                    <tr>
-                        @{
-                            <th scope="row">@counter</th>
-                            foreach (var column in row.Value.OrderBy(x => x.Key))
+                            int counter = 0;
+                            foreach (var columName in ColumnNames?.OrderBy(x => x.Key))
                             {
-
-                                <td>
-                                    <input type="text" value="@column.Value" class="form-control" disabled="@readonlyControl" />
-                                </td>
+                                var id = columName.Value + "_" + counter;
+                                <th scope="col" style="cursor: pointer" @onclick="() => OnClick_Header(columName.Value)" id="@id">
+                                    @*<span class="oi oi-sort-ascending" title="oi-sort-ascending" aria-hidden="true"></span>*@
+                                    @columName.Value
+                                </th>
+                                counter++;
                             }
-                            counter++;
                         }
-                    </tr>
-                            }
-                            }
-            <tr>
-                @{
-
-                    int colspan = 0;
-                    if (ColumnNames.Count % 2 == 0)
-                    {
-                        colspan = ColumnNames.Count / 2;
                     }
-                    else
+                </tr>
+            </thead>
+            <tbody>
+                @if (TransformedRows?.Any() == true)
+                {
+                    var counter = 0;
+                    @foreach (var row in TransformedRows?.OrderBy(x => x.Key))
                     {
-                        colspan = ColumnNames.Count - 1 % 2;
-                    }
+                        //List<TChildRow> childRows =  null;
+                        <tr>
+                            @{
+                                <th scope="row"><span class="@ChildGridExpandIcon" style="color:green" @onclick="() => OnClick_PlusIcon(row.Key, true)"></span></th>
+                                foreach (var column in row.Value.OrderBy(x => x.Key))
+                                {
 
+                                    <td>
+                                        @column.Value
+                                        @*<input type="text" value="@column.Value" class="form-control" disabled="@readonlyControl" />*@
+                                    </td>
+                                }
+                                counter++;
+
+                            }
+                        </tr>
+
+                            
+                                    bool result = false;
+                                    ChildGridRows.TryGetValue(counter, out result);
+                                    if (result)
+                                    {
+                                        <tr>
+                                            <td>
+
+                                            </td>
+                                            <td colspan="@row.Value.Count">
+                                                <table table table-success table-striped>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                Column 1
+                                                            </th>
+                                                            <th>
+                                                                Column 2
+                                                            </th>
+                                                            <th>
+                                                                Column 3
+                                                            </th>
+                                                            <th>
+                                                                Column 4
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                Value 1
+                                                            </td>
+                                                            <td>
+                                                                Value 2
+                                                            </td>
+                                                            <td>
+                                                                Value 3
+                                                            </td>
+                                                            <td>
+                                                                Value 4
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    }
+
+                    }
                 }
-
-                <td colspan="@colspan">
+                <tr>
                     @{
-                        if (btnEditGridComponent_Edit_Disabled == null)
-                        {
-                            <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
-                        }
-                    }
-                    @{
-                        if (btnEditGridComponent_Save_Disabled == null)
-                        {
-                            <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
-                        }
-                    }
-                </td>
-                <td colspan="@colspan">
-                    <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
-                </td>
-            </tr>
-        </tbody>
-    }
 
-</table>
+                        int colspan = 0;
+                        if (ColumnNames.Count % 2 == 0)
+                        {
+                            colspan = ColumnNames.Count / 2;
+                        }
+                        else
+                        {
+                            colspan = ColumnNames.Count - 1 % 2;
+                        }
+
+                    }
+
+                    <td colspan="@colspan">
+                        @{
+                            if (btnEditGridComponent_Edit_Disabled == null)
+                            {
+                                <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
+                            }
+                        }
+                        @{
+                            if (btnEditGridComponent_Save_Disabled == null)
+                            {
+                                <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
+                            }
+                        }
+                    </td>
+                    <td colspan="@colspan">
+                        <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
+                    </td>
+                </tr>
+            </tbody>
+            }
+
+    </table>
+</div>
+
 
 <div class="modal" tabindex="-1" role="dialog" id="editGridComponent_SaveConfirmModal">
     <div class="modal-dialog" role="document">
@@ -143,10 +217,22 @@
 {
 
     [Parameter]
-    public List<TRow> Rows { get; set; }
+    public List<TRow> Datasource { get; set; }
+
+
+    //[Parameter]
+    //public List<TChildRow> ChildRowDatasource { get; set; }
+
+    //[Parameter]
+    //public Func<object, List<TChildRow>> ChildRowDatasourceCallBack { get; set; }
+
+    //[Parameter]
+    //public bool RenderChildGrid { get; set; }
+
+    public bool ShowChildGrid { get; set; }
 
     public Dictionary<int, string>
-        ColumnNames
+    ColumnNames
     { get; set; }
 
     public Dictionary<int, object>
@@ -166,13 +252,19 @@
     public bool readonlyControl { get; set; }
     public bool isLoading { get; set; } = true;
 
+    private List<ColumnSort> ColumnSortInfo { get; set; }
+
+    public Dictionary<int, bool> ChildGridRows = new Dictionary<int, bool>();
+
+    public string ChildGridExpandIcon { get; set; } = "oi oi-plus";
+
 
 
     public async Task<Dictionary<int, string>> GetColumnsFromRows()
     {
         return await Task.Factory.StartNew<Dictionary<int, string>>(() =>
         {
-            foreach (var row in Rows)
+            foreach (var row in Datasource)
             {
                 var rowProperties = row.GetType().GetProperties();
 
@@ -189,6 +281,14 @@
                     {
                         ColumnNames.Add(columns.First().GetPosition(), columns.First().GetColumnName());
                     }
+
+                    var childRows = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ChildRowsAttribute), false).OfType<BlazorComponentPOC.Components.ChildRowsAttribute>();
+
+                    if(childRows?.Any() == true)
+                    {
+                        // var result = ChildRowDatasourceCallBack(row);
+                    }
+
                 }
 
             }
@@ -202,7 +302,7 @@
         return await Task.Factory.StartNew<Dictionary<int, Dictionary<int, object>>>(() =>
         {
             int rowCounter = 1;
-            foreach (var row in Rows)
+            foreach (var row in Datasource)
             {
                 var rowProperties = row.GetType().GetProperties();
 
@@ -273,6 +373,21 @@
         InitializeComponent();
     }
 
+    public void OnClick_PlusIcon(int rowNumber, bool showChildGrid)
+    {
+        ChildGridExpandIcon = showChildGrid ? "oi oi-plus" : "oi oi-minus";
+        if (!ChildGridRows.ContainsKey(rowNumber))
+        {
+            ChildGridRows.Add(rowNumber, showChildGrid);
+        }
+        else
+        {
+            ChildGridRows[rowNumber] = !ChildGridRows[rowNumber];
+        }
+        StateHasChanged();
+        // InitializeComponent();
+    }
+
     private async Task InitializeComponent()
     {
         readonlyControl = true;
@@ -291,6 +406,86 @@
         }
         isLoading = false;
         StateHasChanged();
+    }
+
+
+    private void OnClick_Header(string columnName)
+    {
+        if(ColumnSortInfo == null)
+        {
+            ColumnSortInfo = new List<ColumnSort>();
+        }
+        int sortOrder = ColumnSortInfo.Count();
+        string sortDirection = null;
+
+        if (ColumnSortInfo.Any(x => x.ColumnName == columnName))
+        {
+            sortDirection = "DESC";
+        }
+        else
+        {
+
+            sortDirection = "DESC";
+
+        }
+
+        ColumnSortInfo.Add(new ColumnSort
+        {
+            ColumnName = columnName,
+            SortDirection = sortDirection,
+            SortOrder = sortOrder + 1
+
+        });
+
+        Dictionary<int, object> copiedDictionary = new Dictionary<int, object>();
+
+        for(int i = 0; i<=ColumnSortInfo.Count-1; i++)
+        {
+            if(i==0)
+            {
+                var sortInfo = ColumnSortInfo[i];
+
+                var matchedColumn = ColumnNames.Where(x => x.Value == sortInfo.ColumnName).First();
+
+                List<object> sortedColumnValues = new List<object>();
+
+                foreach(var transformedRow in TransformedRows)
+                {
+                    foreach(var transformedColumn in transformedRow.Value)
+                    {
+                        if(transformedColumn.Key == matchedColumn.Key)
+                        {
+                            copiedDictionary.Add(transformedColumn.Key, transformedColumn.Value);
+                        }
+                    }
+                }
+
+                var result = copiedDictionary.OrderBy(x => x.Value) as Dictionary<int, object>;
+
+                foreach (var transformedRow in TransformedRows)
+                {
+                    foreach (var transformedColumn in transformedRow.Value)
+                    {
+                        if (transformedRow.Key == matchedColumn.Key)
+                        {
+                            object matchedValue;
+                            var newResult = result.TryGetValue(matchedColumn.Key, out matchedValue);
+                            transformedRow.Value.Remove(matchedColumn.Key);
+                            transformedRow.Value.Add(matchedColumn.Key, newResult);
+                        }
+                    }
+                }
+
+
+            }
+        }
+    }
+
+    private class ColumnSort
+    {
+        public string ColumnName { get; set; }
+        public string SortDirection { get; set; }
+        public int SortOrder { get; set; }
     }
 }
 
