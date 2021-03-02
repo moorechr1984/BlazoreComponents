@@ -8,7 +8,8 @@ namespace BlazorComponentPOC.Data
     public class StoreOrderService
     {
         private List<ProductListRow> _cache = new List<ProductListRow>();
-        public Task<List<ProductListRow>> GetStoreOrders()
+        private List<DFInformationRow> _dfInformationCache = new List<DFInformationRow>();
+        public Task<List<ProductListRow>> GetProductListRows()
         {
             for(int i=0; i<=25; i++)
             {
@@ -30,6 +31,32 @@ namespace BlazorComponentPOC.Data
                 });
             }
             return Task.FromResult(_cache);
+        }
+
+        public Task<List<DFInformationRow>> GetDFInformationRows(ProductListRow row)
+        {
+            for (int i = 0; i <= 3; i++)
+            {
+                _dfInformationCache.Add(new DFInformationRow
+                {
+                    BalanceOnHand = 42,
+                    CodeDate = DateTime.Now,
+                    DFId = 85, 
+                    DfToDFTransferQuantity = 0,
+                    FuturePODate = DateTime.Now.AddDays(1),
+                    FuturePOId = 1232,
+                    FuturePOQuantity = 42, 
+                    NetQuantity = 10,
+                    OOSSub = 0,
+                    OvrSub = 0,
+                    PMMTransferQuantity = 0, 
+                    PurchaseOrderQuantity = 10,
+                    TotalAdjustedQuantity = 500,
+                    TotalAvailableQuantity = 5,                    
+
+                });
+            }
+            return Task.FromResult(_dfInformationCache);
         }
 
         public void AddRow()

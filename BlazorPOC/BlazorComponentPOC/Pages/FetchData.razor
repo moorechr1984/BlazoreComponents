@@ -8,16 +8,21 @@
 
 <h1>Editable Grid Demo</h1>
 
-<EditableGridComponent Datasource="@StoreOrders">
+<EditableGridComponent Datasource="@ProductListRows" TChildRow="DFInformationRow" TRow="ProductListRow" ShowChildGrid="true" ChildRowDatasourceCallback=" (productListRow) =>
+                                                                                                                                    {
+                                                                                                                                        var task = _storeOrderService.GetDFInformationRows(productListRow);
+                                                                                                                                        task.Wait();
+                                                                                                                                        return task.Result;
+                       }">
 
 </EditableGridComponent>
 
 
 @code { 
 
-    public List<ProductListRow> StoreOrders { get; set; }
+    public List<ProductListRow> ProductListRows { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        StoreOrders = await _storeOrderService.GetStoreOrders();
+        ProductListRows = await _storeOrderService.GetProductListRows();
     }
 }

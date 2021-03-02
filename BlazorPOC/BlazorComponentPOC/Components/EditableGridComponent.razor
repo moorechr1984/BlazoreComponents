@@ -1,5 +1,5 @@
 ﻿@typeparam TRow
-
+@typeparam TChildRow
 <style>
     table {
         width: 100%;
@@ -9,12 +9,10 @@
         overflow-x: auto;
     }
 
-    .oi-plus{
-        fill:green
+    .oi-plus {
+        fill: green
     }
 </style>
-
-<h3>Editable Grid Component</h3>
 
 @*<table  table-container*@
 
@@ -69,13 +67,12 @@
                         //List<TChildRow> childRows =  null;
                         <tr>
                             @{
-                                <th scope="row"><span class="@ChildGridExpandIcon" style="color:green" @onclick="() => OnClick_PlusIcon(row.Key, true)"></span></th>
+                                <th scope="row"><span class="@ChildGridExpandIcon" style="color: @ChildGridExpandIconStyle" @onclick="() => OnClick_PlusIcon(row.Key, true)"></span></th>
                                 foreach (var column in row.Value.OrderBy(x => x.Key))
                                 {
 
                                     <td>
-                                        @column.Value
-                                        @*<input type="text" value="@column.Value" class="form-control" disabled="@readonlyControl" />*@
+                                        <input type="text" value="@column.Value" class="form-control" disabled="@readonlyControl" />
                                     </td>
                                 }
                                 counter++;
@@ -83,58 +80,31 @@
                             }
                         </tr>
 
-                            
-                                    bool result = false;
-                                    ChildGridRows.TryGetValue(counter, out result);
-                                    if (result)
-                                    {
-                                        <tr>
-                                            <td>
 
-                                            </td>
-                                            <td colspan="@row.Value.Count">
-                                                <table table table-success table-striped>
-                                                    <thead>
-                                                        <tr>
-                                                            <th>
-                                                                Column 1
-                                                            </th>
-                                                            <th>
-                                                                Column 2
-                                                            </th>
-                                                            <th>
-                                                                Column 3
-                                                            </th>
-                                                            <th>
-                                                                Column 4
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>
-                                                                Value 1
-                                                            </td>
-                                                            <td>
-                                                                Value 2
-                                                            </td>
-                                                            <td>
-                                                                Value 3
-                                                            </td>
-                                                            <td>
-                                                                Value 4
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
-                                        </tr>
+                                bool result = false;
+                                ChildGridRows.TryGetValue(counter, out result);
+                                if (result)
+                                {
+                                    var childRows = ChildRowDatasourceCallback(Datasource.ElementAt(row.Key));
+
+                                    if (childRows?.Any() == true)
+                                    {
+                                <tr>
+                                    <td>
+                                    </td>
+                                    <td colspan="@row.Value.Count">
+                                        <EditableGridComponent Datasource="childRows" TChildRow="TChildRow" TRow="TChildRow" ShowChildGrid="false" ></EditableGridComponent>
+                                    </td>
+                                </tr>
+                                        }
                                     }
 
-                    }
-                }
-                <tr>
-                    @{
+                                }
+                                }
+            <tr>
+                @{
+                    if (!ReadonlyGrid)
+                    {
 
                         int colspan = 0;
                         if (ColumnNames.Count % 2 == 0)
@@ -145,29 +115,26 @@
                         {
                             colspan = ColumnNames.Count - 1 % 2;
                         }
-
-                    }
-
-                    <td colspan="@colspan">
-                        @{
+                        <td colspan="@colspan">
                             if (btnEditGridComponent_Edit_Disabled == null)
                             {
-                                <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
+                            <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
                             }
-                        }
-                        @{
                             if (btnEditGridComponent_Save_Disabled == null)
                             {
-                                <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
+                            <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
                             }
-                        }
-                    </td>
-                    <td colspan="@colspan">
-                        <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
-                    </td>
-                </tr>
-            </tbody>
-            }
+                        </td>
+                        <td colspan="@colspan">
+                            <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
+                        </td>
+                    }
+
+                }
+
+            </tr>
+                </tbody>
+                            }
 
     </table>
 </div>
@@ -186,7 +153,7 @@
                 <p>Are you sure you want to save your changes?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary"  data-toggle="modal" data-target="#exampleModal" data-dismiss="modal" @onclick="OnClick_btnEditGridComponent_Save">Save changes</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-dismiss="modal" @onclick="OnClick_btnEditGridComponent_Save">Save changes</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
@@ -219,17 +186,17 @@
     [Parameter]
     public List<TRow> Datasource { get; set; }
 
-
-    //[Parameter]
-    //public List<TChildRow> ChildRowDatasource { get; set; }
-
-    //[Parameter]
-    //public Func<object, List<TChildRow>> ChildRowDatasourceCallBack { get; set; }
+    [Parameter]
+    public Func<TRow, List<TChildRow>> ChildRowDatasourceCallback { get; set; }
 
     //[Parameter]
     //public bool RenderChildGrid { get; set; }
+    [Parameter]
 
     public bool ShowChildGrid { get; set; }
+
+    [Parameter]
+    public bool ReadonlyGrid { get; set; } = true;
 
     public Dictionary<int, string>
     ColumnNames
@@ -258,6 +225,10 @@
 
     public string ChildGridExpandIcon { get; set; } = "oi oi-plus";
 
+    public string ChildGridExpandIconStyle {get; set;} = "green";
+
+
+
 
 
     public async Task<Dictionary<int, string>> GetColumnsFromRows()
@@ -284,7 +255,7 @@
 
                     var childRows = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ChildRowsAttribute), false).OfType<BlazorComponentPOC.Components.ChildRowsAttribute>();
 
-                    if(childRows?.Any() == true)
+                    if (childRows?.Any() == true)
                     {
                         // var result = ChildRowDatasourceCallBack(row);
                     }
@@ -375,21 +346,15 @@
 
     public void OnClick_PlusIcon(int rowNumber, bool showChildGrid)
     {
-        ChildGridExpandIcon = showChildGrid ? "oi oi-plus" : "oi oi-minus";
-        if (!ChildGridRows.ContainsKey(rowNumber))
-        {
-            ChildGridRows.Add(rowNumber, showChildGrid);
-        }
-        else
-        {
-            ChildGridRows[rowNumber] = !ChildGridRows[rowNumber];
-        }
+        SetChildGridStyle(showChildGrid, rowNumber);
+
         StateHasChanged();
         // InitializeComponent();
     }
 
     private async Task InitializeComponent()
     {
+        SetChildGridStyle(false, 0);
         readonlyControl = true;
         btnEditGridComponent_Edit_Disabled = null;
         isLoading = true;
@@ -411,7 +376,7 @@
 
     private void OnClick_Header(string columnName)
     {
-        if(ColumnSortInfo == null)
+        if (ColumnSortInfo == null)
         {
             ColumnSortInfo = new List<ColumnSort>();
         }
@@ -439,9 +404,9 @@
 
         Dictionary<int, object> copiedDictionary = new Dictionary<int, object>();
 
-        for(int i = 0; i<=ColumnSortInfo.Count-1; i++)
+        for (int i = 0; i <= ColumnSortInfo.Count - 1; i++)
         {
-            if(i==0)
+            if (i == 0)
             {
                 var sortInfo = ColumnSortInfo[i];
 
@@ -449,11 +414,11 @@
 
                 List<object> sortedColumnValues = new List<object>();
 
-                foreach(var transformedRow in TransformedRows)
+                foreach (var transformedRow in TransformedRows)
                 {
-                    foreach(var transformedColumn in transformedRow.Value)
+                    foreach (var transformedColumn in transformedRow.Value)
                     {
-                        if(transformedColumn.Key == matchedColumn.Key)
+                        if (transformedColumn.Key == matchedColumn.Key)
                         {
                             copiedDictionary.Add(transformedColumn.Key, transformedColumn.Value);
                         }
@@ -480,6 +445,30 @@
             }
         }
     }
+
+    private void SetChildGridStyle(bool showChildGrid, int rowNumber)
+    {
+        if (ShowChildGrid)
+        {
+            if (!ChildGridRows.ContainsKey(rowNumber))
+            {
+                ChildGridRows.Add(rowNumber, showChildGrid);
+            }
+            else
+            {
+                ChildGridRows[rowNumber] = !ChildGridRows[rowNumber];
+            }
+
+
+            ChildGridExpandIcon = ChildGridRows[rowNumber] ? "oi oi-minus" : "oi oi-plus";
+            ChildGridExpandIconStyle = ChildGridRows[rowNumber] ? "red" : "green";
+        }
+        else
+        {
+            ChildGridExpandIcon = string.Empty;
+        }
+    }
+
 
     private class ColumnSort
     {
