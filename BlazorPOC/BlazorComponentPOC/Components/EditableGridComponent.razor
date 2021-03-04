@@ -55,10 +55,10 @@
                             int counter = 0;
                             foreach (var columName in ColumnNames?.OrderBy(x => x.Key))
                             {
-                                var id = columName.Value + "_" + counter;
-                                <th scope="col" style="cursor: pointer" @onclick="() => OnClick_Header(columName.Value)" id="@id">
+                                var id = columName.Value.ColumnDataPropertyName + "_" + counter;
+                                <th scope="col" style="cursor: pointer" @onclick="() => OnClick_Header(columName.Value.ColumnDataPropertyName)" id="@id">
                                     @*<span class="oi oi-sort-ascending" title="oi-sort-ascending" aria-hidden="true"></span>*@
-                                    @columName.Value
+                                    @columName.Value.ColumnDisplayName
                                 </th>
                                 counter++;
                             }
@@ -229,13 +229,13 @@
     [Parameter]
     public bool ReadonlyChildGrid { get; set; } = true;
 
-    public Dictionary<int, string>
-    ColumnNames
-    { get; set; }
 
-    public Dictionary<int, object>
-        ColumnValues
-    { get; set; }
+    public List<TRow> OriginalDatasource { get; set; }
+
+
+    private Dictionary<int, ColumnInfo> ColumnNames { get; set; }
+
+    public Dictionary<int, object> ColumnValues { get; set; }
 
     public Dictionary<int, Dictionary<int, object>> TransformedRows { get; set; }
 
@@ -262,85 +262,71 @@
 
 
 
-    public async Task<Dictionary<int, string>> GetColumnsFromRows()
+    private void BuildColumnHeader()
     {
-        return await Task.Factory.StartNew<Dictionary<int, string>>(() =>
+        foreach (var row in Datasource)
         {
-            foreach (var row in Datasource)
+            var rowProperties = row.GetType().GetProperties();
+
+            foreach (var rowProperty in rowProperties)
             {
-                var rowProperties = row.GetType().GetProperties();
+                var columns = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>();
 
-                foreach (var rowProperty in rowProperties)
+                if (ColumnNames == null)
                 {
-                    var columns = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>();
-
-                    if (ColumnNames == null)
-                    {
-                        ColumnNames = new Dictionary<int, string>();
-                    }
-
-                    if (!ColumnNames.ContainsKey(columns.First().GetPosition()))
-                    {
-                        ColumnNames.Add(columns.First().GetPosition(), columns.First().GetColumnName());
-                    }
-
-                    var childRows = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ChildRowsAttribute), false).OfType<BlazorComponentPOC.Components.ChildRowsAttribute>();
-
-                    if (childRows?.Any() == true)
-                    {
-                        // var result = ChildRowDatasourceCallBack(row);
-                    }
-
+                    ColumnNames = new Dictionary<int, ColumnInfo>();
                 }
 
+                if (!ColumnNames.ContainsKey(columns.First().GetPosition()))
+                {
+                    ColumnNames.Add(columns.First().GetPosition(), new ColumnInfo
+                    {
+                        ColumnDisplayName = string.IsNullOrWhiteSpace(columns.First().GetColumnName()) ? rowProperty.Name : columns.First().GetColumnName(),
+                        ColumnDataPropertyName = rowProperty.Name
+                    });
+                }
             }
-            return ColumnNames;
-        });
+        }
     }
 
 
-    public async Task<Dictionary<int, Dictionary<int, object>>> GetRows()
+    private void BuildRows()
     {
-        return await Task.Factory.StartNew<Dictionary<int, Dictionary<int, object>>>(() =>
+        int rowCounter = 1;
+        foreach (var row in Datasource)
         {
-            int rowCounter = 1;
-            foreach (var row in Datasource)
+            var rowProperties = row.GetType().GetProperties();
+
+            foreach (var rowProperty in rowProperties)
             {
-                var rowProperties = row.GetType().GetProperties();
-
-                foreach (var rowProperty in rowProperties)
+                if (ColumnValues == null)
                 {
-                    if (ColumnValues == null)
-                    {
-                        ColumnValues = new Dictionary<int, object>();
-                    }
-
-
-                    if (rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().Any())
-                    {
-                        var column = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().First();
-                        if (!ColumnValues.ContainsKey(column.GetPosition()))
-                        {
-                            ColumnValues.Add(column.GetPosition(), rowProperty.GetValue(row));
-                        }
-                    }
+                    ColumnValues = new Dictionary<int, object>();
                 }
-                if (TransformedRows == null)
-                {
-                    TransformedRows = new Dictionary<int, Dictionary<int, object>>();
-                };
-                var copiedColumnValue = ColumnValues;
-                if (!TransformedRows.ContainsKey(rowCounter))
-                {
-                    TransformedRows.Add(rowCounter, copiedColumnValue);
 
-                    rowCounter++;
-                    ColumnValues = null;
+
+                if (rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().Any())
+                {
+                    var column = rowProperty.GetCustomAttributes(typeof(BlazorComponentPOC.Components.ColumnAttribute), false).OfType<BlazorComponentPOC.Components.ColumnAttribute>().First();
+                    if (!ColumnValues.ContainsKey(column.GetPosition()))
+                    {
+                        ColumnValues.Add(column.GetPosition(), rowProperty.GetValue(row));
+                    }
                 }
             }
+            if (TransformedRows == null)
+            {
+                TransformedRows = new Dictionary<int, Dictionary<int, object>>();
+            };
+            var copiedColumnValue = ColumnValues;
+            if (!TransformedRows.ContainsKey(rowCounter))
+            {
+                TransformedRows.Add(rowCounter, copiedColumnValue);
 
-            return TransformedRows;
-        });
+                rowCounter++;
+                ColumnValues = null;
+            }
+        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -385,22 +371,18 @@
 
     private async Task InitializeComponent()
     {
+        if(OriginalDatasource == null)
+        {
+            OriginalDatasource = Datasource;
+        }
         SetChildGridStyle(false, 0);
         readonlyControl = true;
         btnEditGridComponent_Edit_Disabled = null;
         btnEditGridComponent_Save_Disabled = "disabled";
         isLoading = true;
         StateHasChanged();
-        await GetColumnsFromRows();
-        try
-        {
-
-            await GetRows();
-        }
-        catch (Exception e)
-        {
-            throw e;
-        }
+        BuildColumnHeader();
+        BuildRows();
         isLoading = false;
         StateHasChanged();
     }
@@ -408,6 +390,9 @@
 
     private void OnClick_Header(string columnName)
     {
+        isLoading = true;
+        StateHasChanged();
+
         if (ColumnSortInfo == null)
         {
             ColumnSortInfo = new List<ColumnSort>();
@@ -421,61 +406,43 @@
         }
         else
         {
-
-            sortDirection = "DESC";
-
+            sortDirection = "ASC";
         }
 
-        ColumnSortInfo.Add(new ColumnSort
+        if(ColumnSortInfo.Any(x => x.ColumnName == columnName))
         {
-            ColumnName = columnName,
-            SortDirection = sortDirection,
-            SortOrder = sortOrder + 1
-
-        });
-
-        Dictionary<int, object> copiedDictionary = new Dictionary<int, object>();
-
-        for (int i = 0; i <= ColumnSortInfo.Count - 1; i++)
+            var columnInfo = ColumnSortInfo.Find(x => x.ColumnName == columnName);
+            var copy = columnInfo;
+            copy.SortDirection = sortDirection;
+            ColumnSortInfo.Remove(columnInfo);
+            ColumnSortInfo.Add(copy);
+        }
+        else
         {
-            if (i == 0)
+            ColumnSortInfo.Add(new ColumnSort
             {
-                var sortInfo = ColumnSortInfo[i];
-
-                var matchedColumn = ColumnNames.Where(x => x.Value == sortInfo.ColumnName).First();
-
-                List<object> sortedColumnValues = new List<object>();
-
-                foreach (var transformedRow in TransformedRows)
-                {
-                    foreach (var transformedColumn in transformedRow.Value)
-                    {
-                        if (transformedColumn.Key == matchedColumn.Key)
-                        {
-                            copiedDictionary.Add(transformedColumn.Key, transformedColumn.Value);
-                        }
-                    }
-                }
-
-                var result = copiedDictionary.OrderBy(x => x.Value) as Dictionary<int, object>;
-
-                foreach (var transformedRow in TransformedRows)
-                {
-                    foreach (var transformedColumn in transformedRow.Value)
-                    {
-                        if (transformedRow.Key == matchedColumn.Key)
-                        {
-                            object matchedValue;
-                            var newResult = result.TryGetValue(matchedColumn.Key, out matchedValue);
-                            transformedRow.Value.Remove(matchedColumn.Key);
-                            transformedRow.Value.Add(matchedColumn.Key, newResult);
-                        }
-                    }
-                }
-
-
-            }
+                ColumnName = columnName,
+                SortDirection = sortDirection,
+                SortOrder = ColumnSortInfo.Count + 1
+            });
         }
+
+        var type = typeof(TRow);
+
+        var sortProperty = type.GetProperty(ColumnSortInfo[0].ColumnName);
+
+        if(ColumnSortInfo[0].SortDirection == "ASC")
+        {
+            Datasource = Datasource.OrderBy(x => sortProperty.GetValue(x, null)).ToList();
+        }
+        if (ColumnSortInfo[0].SortDirection == "DESC")
+        {
+            Datasource = Datasource.OrderByDescending(x => sortProperty.GetValue(x)).ToList();
+        }
+        ColumnNames = null;
+        TransformedRows = null;
+        var task = InitializeComponent();
+        task.Wait();
     }
 
     private void SetChildGridStyle(bool showChildGrid, int rowNumber)
@@ -505,6 +472,14 @@
     private class ColumnSort
     {
         public string ColumnName { get; set; }
+        public string SortDirection { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    private class ColumnInfo
+    {
+        public string ColumnDisplayName { get; set; }
+        public string ColumnDataPropertyName { get; set; }
         public string SortDirection { get; set; }
         public int SortOrder { get; set; }
     }
