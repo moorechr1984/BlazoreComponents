@@ -15,17 +15,16 @@ namespace BlazorComponentPOC.Data
             {
                 _cache.Add(new ProductListRow
                 {
-                    UnitId = 42,
                     OrderDate = DateTime.Now,
                     ProductId = 519933,
-                    BalanceOnHand = 300,
+                    BalanceOnHand = i,
                     CasepackFlag = "Y",
                     DfToDFTransferQuantity = 234,
                     ItemStatus = "TEST",
                     MeijerItemCode = "202252",
                     PackQuantity = 12,
                     ProductDescription = "Bananas",
-                    PromoStoreNumber = 163,
+                    PromoStoreNumber = i,
                     PromotionType = "Promo Type"
 
                 });
@@ -35,6 +34,7 @@ namespace BlazorComponentPOC.Data
 
         public Task<List<DFInformationRow>> GetDFInformationRows(ProductListRow row)
         {
+            _dfInformationCache.Clear();
             for (int i = 0; i <= 3; i++)
             {
                 _dfInformationCache.Add(new DFInformationRow

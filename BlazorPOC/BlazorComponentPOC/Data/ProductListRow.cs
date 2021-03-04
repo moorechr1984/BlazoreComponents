@@ -11,44 +11,40 @@ namespace BlazorComponentPOC.Data
         [Components.Column("Order Date", 1)]
         public DateTime? OrderDate { get; set; }
 
-        [Components.Column("Store #", 2)]
-        public int? UnitId { get; set; }
-
-
-        [Components.Column("Pid", 1)]
+        [Components.Column("Pid", 2)]
         public int ProductId { get; set; }
 
-        [Components.Column("Product Description", 2)]
+        [Components.Column("Product Description", 3)]
         public string ProductDescription{ get; set; }
 
-        [Components.Column("MIC", 3)]
+        [Components.Column("MIC", 4)]
         public string MeijerItemCode { get; set; }
 
-        [Components.Column("BOH", 4)]
+        [Components.Column("BOH", 5)]
         public int BalanceOnHand { get; set; }
 
-        [Components.Column("PO", 5)]
+        [Components.Column("PO", 6)]
         public int PurchaseOrderQuantity { get; set; }
 
-        [Components.Column("DF-DF", 6)]
+        [Components.Column("DF-DF", 7)]
         public int DfToDFTransferQuantity { get; set; }
 
-        [Components.Column("Total Avail", 7)]
+        [Components.Column("Total Avail", 8)]
         public int TotalAvailableQuantity { get; set; }
 
-        [Components.Column("TOQ", 8)]
+        [Components.Column("TOQ", 9)]
         public int TotalOrderQuantity { get; set; }
 
-        [Components.Column("TSQ", 9)]
+        [Components.Column("TSQ", 10)]
         public int TotalStoreOrderQuantity { get; set; }
 
-        [Components.Column("CPK Flag", 10)]
+        [Components.Column("CPK Flag", 11)]
         public string CasepackFlag { get; set; }
 
-        [Components.Column("ItemStatus", 11)]
+        [Components.Column("ItemStatus", 12)]
         public string ItemStatus { get; set; }
 
-        [Components.Column("Pack QTY", 12)]
+        [Components.Column("Pack QTY", 13)]
         public int PackQuantity { get; set; }
 
         [Components.Column("Promo Type", 14)]
@@ -61,7 +57,7 @@ namespace BlazorComponentPOC.Data
 
 
 
-        [Components.Column("Id", 5)]
+        [Components.Column("Id", 16)]
         public Guid Id { get { return Guid.NewGuid(); } }
 
     }

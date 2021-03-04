@@ -7,19 +7,20 @@
 @inject StoreOrderService _storeOrderService
 
 <h1>Editable Grid Demo</h1>
-
+ 
 <EditableGridComponent Datasource="@ProductListRows" TChildRow="DFInformationRow" TRow="ProductListRow" ShowChildGrid="true" ChildRowDatasourceCallback=" (productListRow) =>
                                                                                                                                     {
                                                                                                                                         var task = _storeOrderService.GetDFInformationRows(productListRow);
                                                                                                                                         task.Wait();
                                                                                                                                         return task.Result;
-                       }">
+                       }"
+                        ReadonlyChildGrid="false">
 
 </EditableGridComponent>
 
 
 @code { 
-
+   
     public List<ProductListRow> ProductListRows { get; set; }
     protected override async Task OnInitializedAsync()
     {
