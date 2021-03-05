@@ -7,19 +7,60 @@
 @inject StoreOrderService _storeOrderService
 
 <h1>Editable Grid Demo</h1>
- 
+
+<p>NOTE:  The following options are in no particular order or ranking.</p>
+
+<h2>Option 1: Product List Grid with nested DF Information Grid</h2>
+
 <EditableGridComponent Datasource="@ProductListRows" TChildRow="DFInformationRow" TRow="ProductListRow" ShowChildGrid="true" ChildRowDatasourceCallback=" (productListRow) =>
                                                                                                                                     {
                                                                                                                                         var task = _storeOrderService.GetDFInformationRows(productListRow);
                                                                                                                                         task.Wait();
                                                                                                                                         return task.Result;
+                                                                                                                                        
                        }">
 
 </EditableGridComponent>
 
+<h2>Option 2: Product List Grid for each Product with nested DF Information Grid</h2>
 
-@code { 
-   
+
+@{
+    @foreach (var productListRow in ProductListRows)
+    {
+        var newProductList = new List<ProductListRow> { productListRow };
+        <EditableGridComponent Datasource="@newProductList" TChildRow="DFInformationRow" TRow="ProductListRow" ShowChildGrid="true" ChildRowDatasourceCallback=" (productListRow) =>
+                                                                                                                                    {
+            var task = _storeOrderService.GetDFInformationRows(productListRow);
+            task.Wait();
+            return task.Result;
+        }" ShowHideTableIcon="true">
+        </EditableGridComponent>
+
+    }
+}
+
+
+
+
+
+<h2>Option 3: Product List Grid for each Product with one DF Information Grid</h2>
+@{
+    @foreach (var productListRow in ProductListRows)
+    {
+        var newProductList = new List<ProductListRow> { productListRow };
+        <EditableGridComponent Datasource="@newProductList" TChildRow="DFInformationRow" TRow="ProductListRow" ShowHideTableIcon="true">
+        </EditableGridComponent>
+
+    }
+}
+
+
+
+@code {
+
+    private bool IsLoading { get; set; }
+
     public List<ProductListRow> ProductListRows { get; set; }
     protected override async Task OnInitializedAsync()
     {
