@@ -11,52 +11,78 @@ namespace BlazorComponentPOC.Data
         private List<DFInformationRow> _dfInformationCache = new List<DFInformationRow>();
         public Task<List<ProductListRow>> GetProductListRows()
         {
-            for(int i=0; i<=25; i++)
-            {
                 _cache.Add(new ProductListRow
                 {
-                    OrderDate = DateTime.Now,
                     ProductId = 519933,
-                    BalanceOnHand = i,
-                    CasepackFlag = "Y",
-                    DfToDFTransferQuantity = 234,
-                    ItemStatus = "TEST",
-                    MeijerItemCode = "202252",
-                    PackQuantity = 12,
-                    ProductDescription = "Bananas",
-                    PromoStoreNumber = i,
-                    PromotionType = "Promo Type"
+                    ProductDescription = "BANANAS LB",
+                    MeijerItemCode = "189386",
+                    BalanceOnHand = 2130,
+                    PurchaseOrderQuantity = 348,
+                    TotalAvailableQuantity = 2478,
+                    CasepackFlag = "N",
+                    ItemStatus = "STO",
+                    PackQuantity = 40
 
                 });
-            }
+                _cache.Add(new ProductListRow
+                {
+                    ProductId = 519933,
+                    ProductDescription = "BANANAS LB",
+                    MeijerItemCode = "202004",
+                    ItemStatus = "STO",
+                    PackQuantity = 40,
+
+                });
+                _cache.Add(new ProductListRow
+                {
+                    ProductId = 519933,
+                    ProductDescription = "BANANAS LB",
+                    MeijerItemCode = "202525",
+                    BalanceOnHand = 5586,
+                    PurchaseOrderQuantity = 894,
+                    TotalAvailableQuantity = 6480,
+                    CasepackFlag = "Y",
+                    ItemStatus = "STO",
+                    PackQuantity = 40,
+
+                });
             return Task.FromResult(_cache);
         }
 
         public Task<List<DFInformationRow>> GetDFInformationRows(ProductListRow row)
         {
-            _dfInformationCache.Clear();
-            for (int i = 0; i <= 3; i++)
+            var list = new List<DFInformationRow>();
+            list.Add(new DFInformationRow
             {
-                _dfInformationCache.Add(new DFInformationRow
-                {
-                    BalanceOnHand = 42,
-                    CodeDate = DateTime.Now,
-                    DFId = 85, 
-                    DfToDFTransferQuantity = 0,
-                    FuturePODate = DateTime.Now.AddDays(1),
-                    FuturePOId = 1232,
-                    FuturePOQuantity = 42, 
-                    NetQuantity = 10,
-                    OOSSub = 0,
-                    OvrSub = 0,
-                    PMMTransferQuantity = 0, 
-                    PurchaseOrderQuantity = 10,
-                    TotalAdjustedQuantity = 500,
-                    TotalAvailableQuantity = 5,                    
+                DFId = 85,
+                BalanceOnHand = 804,
+                TotalAvailableQuantity = 804,
+                NetQuantity = 804                   
 
-                });
-            }
-            return Task.FromResult(_dfInformationCache);
+            });
+            list.Add(new DFInformationRow
+            {
+                DFId = 85,
+                BalanceOnHand = 498,
+                TotalAvailableQuantity = 498,
+                NetQuantity = 498
+            });
+            list.Add(new DFInformationRow
+            {
+                DFId = 872,
+                BalanceOnHand = 318,
+                PurchaseOrderQuantity = 348,
+                TotalAvailableQuantity = 667,
+                NetQuantity = 667
+            });
+            list.Add(new DFInformationRow
+            {
+                DFId = 883,
+                BalanceOnHand = 510,
+                TotalAvailableQuantity = 510,
+                NetQuantity = 510
+            });
+            return Task.FromResult(list);
         }
 
         public void AddRow()

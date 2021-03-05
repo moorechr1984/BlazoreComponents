@@ -8,57 +8,54 @@ namespace BlazorComponentPOC.Data
     public class ProductListRow
     {
 
-        [Components.Column("Order Date", 1)]
-        public DateTime? OrderDate { get; set; }
-
-        [Components.Column("Pid", 2)]
+        [Components.Column("Pid", 1)]
         public int ProductId { get; set; }
 
-        [Components.Column("Product Description", 3)]
+        [Components.Column("Product Description", 2)]
         public string ProductDescription{ get; set; }
 
-        [Components.Column("MIC", 4)]
+        [Components.Column("MIC", 3)]
         public string MeijerItemCode { get; set; }
 
-        [Components.Column("BOH", 5)]
+        [Components.Column("BOH", 4)]
         public int BalanceOnHand { get; set; }
 
-        [Components.Column("PO", 6)]
+        [Components.Column("PO", 5)]
         public int PurchaseOrderQuantity { get; set; }
 
-        [Components.Column("DF-DF", 7)]
+        [Components.Column("DF-DF", 6)]
         public int DfToDFTransferQuantity { get; set; }
 
-        [Components.Column("Total Avail", 8)]
+        [Components.Column("Total Avail", 7)]
         public int TotalAvailableQuantity { get; set; }
 
-        [Components.Column("TOQ", 9)]
+        [Components.Column("TOQ", 8)]
         public int TotalOrderQuantity { get; set; }
 
-        [Components.Column("TSQ", 10)]
+        [Components.Column("TSQ", 9)]
         public int TotalStoreOrderQuantity { get; set; }
 
-        [Components.Column("CPK Flag", 11)]
+        [Components.Column("CPK Flag", 10)]
         public string CasepackFlag { get; set; }
 
-        [Components.Column("ItemStatus", 12)]
+        [Components.Column("ItemStatus", 11)]
         public string ItemStatus { get; set; }
 
-        [Components.Column("Pack QTY", 13)]
-        public int PackQuantity { get; set; }
+        [Components.Column("Pack QTY", 12)]
+        public decimal PackQuantity { get; set; }
 
-        [Components.Column("Promo Type", 14)]
+        [Components.Column("Promo Type", 13)]
         public string PromotionType { get; set; }
 
-        [Components.Column("Promo Store #", 15)]
+        [Components.Column("Promo Store #", 14)]
         public int PromoStoreNumber { get; set; }
 
 
 
 
 
-        [Components.Column("Id", 16)]
-        public Guid Id { get { return Guid.NewGuid(); } }
+        //[Components.Column("Id", 16)]
+        //public Guid Id { get { return Guid.NewGuid(); } }
 
     }
 }

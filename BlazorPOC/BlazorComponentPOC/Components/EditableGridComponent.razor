@@ -4,6 +4,7 @@
 @using BlazorComponentPOC.Components
 @using Newtonsoft.Json
 @using Newtonsoft.Json.Linq
+
 <style>
     table {
         width: 100%;
@@ -17,8 +18,6 @@
         fill: green
     }
 </style>
-
-@*<table  table-container*@
 
 <div class="table-responsive">
     <table class="table table-bordered table-hover table-responsive">
@@ -42,12 +41,11 @@
         }
         else
         {
-            <thead>
+            <thead class = "thead-light">
                 <tr>
                     @{
                         if (ChildRowDatasourceCallback != null)
                         {
-
                             <th scope="col"></th>
                         }
                         if (ColumnNames != null)
@@ -106,8 +104,6 @@
 
                     }
                 </tr>
-
-
                         if (result)
                         {
                             var childRows = ChildRowDatasourceCallback(Datasource.ElementAt(row.Key));
@@ -141,17 +137,17 @@
                                 colspan = ColumnNames.Count - 1 % 2;
                             }
                             <td colspan="@colspan">
-                                @{
+                            @{
 
-                                    if (btnEditGridComponent_Edit_Disabled == null)
-                                    {
-                                        <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
-                                    }
-                                    if (btnEditGridComponent_Save_Disabled == null)
-                                    {
-                                        <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
-                                    }
+                                if (btnEditGridComponent_Edit_Disabled == null)
+                                {
+                                    <button type="button" class="btn btn-primary @btnEditGridComponent_Edit_Disabled" id="btnEditGridComponent_Edit_@Guid.NewGuid()" disabled="@btnEditGridComponent_Edit_Disabled" @onclick="OnClick_btnEditGridComponent_Edit">Edit</button>
                                 }
+                                if (btnEditGridComponent_Save_Disabled == null)
+                                {
+                                    <button class="btn btn-primary @btnEditGridComponent_Cancel_Disabled" id="btnEditGridComponent_Cancel_@Guid.NewGuid()" disabled="@btnEditGridComponent_Cancel_Disabled" data-toggle="modal" data-target="#editGridComponent_CancelConfirmModal">Cancel</button>
+                                }
+                            }
                             </td>
                             <td colspan="@colspan">
                                 <button type="button" class="btn btn-success btnEditGridComponent_Save_Disabled" id="btnEditGridComponent_Save_@Guid.NewGuid()" disabled="@btnEditGridComponent_Save_Disabled" data-toggle="modal" data-target="#editGridComponent_SaveConfirmModal">Save</button>
@@ -257,9 +253,6 @@
     public string ChildGridExpandIcon { get; set; } = "oi oi-plus";
 
     public string ChildGridExpandIconStyle { get; set; } = "green";
-
-
-
 
 
     private void BuildColumnHeader()
@@ -398,22 +391,12 @@
             ColumnSortInfo = new List<ColumnSort>();
         }
         int sortOrder = ColumnSortInfo.Count();
-        string sortDirection = null;
-
-        if (ColumnSortInfo.Any(x => x.ColumnName == columnName))
-        {
-            sortDirection = "DESC";
-        }
-        else
-        {
-            sortDirection = "ASC";
-        }
 
         if(ColumnSortInfo.Any(x => x.ColumnName == columnName))
         {
             var columnInfo = ColumnSortInfo.Find(x => x.ColumnName == columnName);
             var copy = columnInfo;
-            copy.SortDirection = sortDirection;
+            copy.SortDirection = copy.SortDirection == "ASC" ? "DESC" : "ASC";
             ColumnSortInfo.Remove(columnInfo);
             ColumnSortInfo.Add(copy);
         }
@@ -422,7 +405,7 @@
             ColumnSortInfo.Add(new ColumnSort
             {
                 ColumnName = columnName,
-                SortDirection = sortDirection,
+                SortDirection = "DESC",
                 SortOrder = ColumnSortInfo.Count + 1
             });
         }
@@ -431,13 +414,17 @@
 
         var sortProperty = type.GetProperty(ColumnSortInfo[0].ColumnName);
 
-        if(ColumnSortInfo[0].SortDirection == "ASC")
+
+        foreach(var sortInfo in ColumnSortInfo.OrderBy(x => x.SortOrder))
         {
-            Datasource = Datasource.OrderBy(x => sortProperty.GetValue(x, null)).ToList();
-        }
-        if (ColumnSortInfo[0].SortDirection == "DESC")
-        {
-            Datasource = Datasource.OrderByDescending(x => sortProperty.GetValue(x)).ToList();
+            if (sortInfo.SortDirection == "ASC")
+            {
+                Datasource = Datasource.OrderBy(x => sortProperty.GetValue(x, null)).ToList();
+            }
+            if (sortInfo.SortDirection == "DESC")
+            {
+                Datasource = Datasource.OrderByDescending(x => sortProperty.GetValue(x)).ToList();
+            }
         }
         ColumnNames = null;
         TransformedRows = null;
