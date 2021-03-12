@@ -6,21 +6,32 @@
 @using Newtonsoft.Json.Linq
 
 <style>
-    table {
+/*    table {
         width: 100%;
     }
 
     .table-container {
         overflow-x: auto;
     }
-
+*/
     .oi-plus {
         fill: green
     }
 </style>
 
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <label class="input-group-text" for="select_theme">Table Theme:</label>
+    </div>
+    <select @bind="SelectedTheme" id="select_theme">
+        <option id="default" selected>Select a Theme...</option>
+        <option id="dark">Dark</option>
+        <option id="light">Light</option>
+    </select>
+</div>
 <div class="table-responsive">
-    <table class="table table-bordered table-hover table-responsive">
+    <table class="table table-bordered table-hover @GridTheme">
 
         @if (isLoading)
         {
@@ -56,8 +67,23 @@
                                 foreach (var columName in ColumnNames?.OrderBy(x => x.Key))
                                 {
                                     var id = columName.Value.ColumnDataPropertyName + "_" + counter;
-                                    <th scope="col" style="cursor: pointer" @onclick="() => OnClick_Header(columName.Value.ColumnDataPropertyName)" id="@id">
-                                        @*<span class="oi oi-sort-ascending" title="oi-sort-ascending" aria-hidden="true"></span>*@
+
+                                    string css = null;
+                                    if(ColumnSortInfo != null && ColumnSortInfo.Any())
+                                    {
+                                        var columnSortInfo = ColumnSortInfo.Find(x => x.ColumnName == columName.Value?.ColumnDataPropertyName);
+
+                                        if(columnSortInfo != null)
+                                        {
+                                            css = columnSortInfo.SortDirection == "ASC" ? "oi oi-chevron-top" : "oi oi-chevron-bottom";
+                                        }
+                                    }
+                                    else
+                                    {
+                                        css = "oi oi-chevron-top";
+                                    }
+                                    <th scope="col" class ="text-sm-left"style="cursor: pointer" @onclick="() => OnClick_Header(columName.Value.ColumnDataPropertyName)" id="@id">
+                                        <i class="bi bi-sort-up"></i>
                                         @columName.Value.ColumnDisplayName
                                     </th>
                                     counter++;
@@ -273,6 +299,10 @@
     public string ChildGridExpandIcon { get; set; } = "oi oi-plus";
 
     public string ChildGridExpandIconStyle { get; set; } = "green";
+
+    public string SelectedTheme { get; set; }
+
+    private string GridTheme { get { return SelectedTheme == "Dark" ? "table-dark" : ""; } }
 
 
     private void BuildColumnHeader()
