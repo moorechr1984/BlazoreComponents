@@ -25,48 +25,30 @@ namespace BlazorComponentPOC.Components
         public bool ReadonlyGrid { get; set; } = true;
 
         [Parameter]
-
         public bool ShowChildGrid { get; set; }
-
 
         [Parameter]
         public bool ShowHideTableIcon { get; set; } = false;
         #endregion
 
         #region Private class fields
-        private List<TRow> _originalDatasource { get; set; }
-
-
-        private Dictionary<int, ColumnInfo> _columnNames { get; set; }
-
-        private Dictionary<int, object> _columnValues { get; set; }
-
-        private Dictionary<int, Dictionary<int, object>> _transformedRows { get; set; }
-
-        private List<TRow> _rowsToBeUsed { get; set; }
-
-        private string _btnEditGridComponentEditDisabled { get; set; }
-
-        private string _btnEditGridComponentSaveDisabled { get; set; }
-
         private string _btnEditGridComponentCancelDisabled { get; set; } = "disabled";
-
-        private bool _readonlyControl { get; set; }
-        private bool _isLoading { get; set; } = true;
-
-        private List<ColumnSort> _columnSortInfo { get; set; }
-
-        private Dictionary<int, bool> _childGridRows = new Dictionary<int, bool>();
-
-        private bool _hideGrid { get; set; }
-
+        private string _btnEditGridComponentEditDisabled { get; set; }
+        private string _btnEditGridComponentSaveDisabled { get; set; }
         private string _childGridExpandIcon { get; set; } = "oi oi-plus";
-
         private string _childGridExpandIconStyle { get; set; } = "green";
-
-        private string _selectedTheme { get; set; }
-
+        private Dictionary<int, bool> _childGridRows = new Dictionary<int, bool>();
+        private Dictionary<int, ColumnInfo> _columnNames { get; set; }
+        private List<ColumnSort> _columnSortInfo { get; set; }
+        private Dictionary<int, object> _columnValues { get; set; }
         private string _gridTheme { get { return _selectedTheme == "Dark" ? "table-dark" : ""; } }
+        private bool _hideGrid { get; set; }
+        private bool _isLoading { get; set; } = true;
+        private List<TRow> _originalDatasource { get; set; }
+        private bool _readonlyControl { get; set; }
+        private List<TRow> _rowsToBeUsed { get; set; }
+        private string _selectedTheme { get; set; }
+        private Dictionary<int, Dictionary<int, object>> _transformedRows { get; set; }
         #endregion
 
         #region Private methods
@@ -100,8 +82,6 @@ namespace BlazorComponentPOC.Components
                 }
             }
         }
-
-
         private void BuildRows()
         {
             if (Datasource != null)
@@ -143,47 +123,6 @@ namespace BlazorComponentPOC.Components
                 }
             }
         }
-
-        protected override async Task OnInitializedAsync()
-        {
-            InitializeComponent();
-        }
-
-        private void OnClick_btnEditGridComponent_Edit(MouseEventArgs args)
-        {
-            _btnEditGridComponentEditDisabled = "disabled";
-            _btnEditGridComponentSaveDisabled = null;
-            _btnEditGridComponentCancelDisabled = null;
-            _readonlyControl = false;
-            StateHasChanged();
-        }
-
-        private void OnClick_btnEditGridComponent_Save()
-        {
-            _btnEditGridComponentEditDisabled = null;
-            _btnEditGridComponentSaveDisabled = "disabled";
-            _btnEditGridComponentCancelDisabled = "disabled";
-            _readonlyControl = _readonlyControl;
-            StateHasChanged();
-        }
-
-        public void OnClick_btnEditGridComponent_Cancel(MouseEventArgs args)
-        {
-            _btnEditGridComponentEditDisabled = null;
-            _btnEditGridComponentSaveDisabled = "disabled";
-            _btnEditGridComponentCancelDisabled = "disabled";
-            _readonlyControl = true;
-            InitializeComponent();
-        }
-
-        public void OnClick_PlusIcon(int rowNumber, bool showChildGrid)
-        {
-            SetChildGridStyle(showChildGrid, rowNumber);
-
-            StateHasChanged();
-            // InitializeComponent();
-        }
-
         private async Task InitializeComponent()
         {
             if (_originalDatasource == null)
@@ -201,8 +140,30 @@ namespace BlazorComponentPOC.Components
             _isLoading = false;
             StateHasChanged();
         }
-
-
+        public void OnClick_btnEditGridComponent_Cancel(MouseEventArgs args)
+        {
+            _btnEditGridComponentEditDisabled = null;
+            _btnEditGridComponentSaveDisabled = "disabled";
+            _btnEditGridComponentCancelDisabled = "disabled";
+            _readonlyControl = true;
+            InitializeComponent();
+        }
+        private void OnClick_btnEditGridComponent_Edit(MouseEventArgs args)
+        {
+            _btnEditGridComponentEditDisabled = "disabled";
+            _btnEditGridComponentSaveDisabled = null;
+            _btnEditGridComponentCancelDisabled = null;
+            _readonlyControl = false;
+            StateHasChanged();
+        }
+        private void OnClick_btnEditGridComponent_Save()
+        {
+            _btnEditGridComponentEditDisabled = null;
+            _btnEditGridComponentSaveDisabled = "disabled";
+            _btnEditGridComponentCancelDisabled = "disabled";
+            _readonlyControl = _readonlyControl;
+            StateHasChanged();
+        }
         private void OnClick_Header(string columnName)
         {
             _isLoading = true;
@@ -253,7 +214,22 @@ namespace BlazorComponentPOC.Components
             var task = InitializeComponent();
             task.Wait();
         }
+        public void OnClick_PlusIcon(int rowNumber, bool showChildGrid)
+        {
+            SetChildGridStyle(showChildGrid, rowNumber);
 
+            StateHasChanged();
+            // InitializeComponent();
+        }
+        private void OnHideGridClick()
+        {
+            _hideGrid = true;
+            StateHasChanged();
+        }
+        protected override async Task OnInitializedAsync()
+        {
+            InitializeComponent();
+        }
         private void SetChildGridStyle(bool showChildGrid, int rowNumber)
         {
             if (ShowChildGrid)
@@ -275,12 +251,6 @@ namespace BlazorComponentPOC.Components
             {
                 _childGridExpandIcon = string.Empty;
             }
-        }
-
-        private void OnHideGridClick()
-        {
-            _hideGrid = true;
-            StateHasChanged();
         }
         #endregion
     }
