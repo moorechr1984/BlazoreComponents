@@ -56,7 +56,6 @@ namespace BlazorComponentPOC.Components
         {
             if (Datasource != null)
             {
-
                 foreach (var row in Datasource)
                 {
                     var rowProperties = row.GetType().GetProperties();
@@ -125,10 +124,6 @@ namespace BlazorComponentPOC.Components
         }
         private async Task InitializeComponent()
         {
-            if (_originalDatasource == null)
-            {
-                _originalDatasource = Datasource;
-            }
             SetChildGridStyle(false, 0);
             _readonlyControl = true;
             _btnEditGridComponentEditDisabled = null;
@@ -195,18 +190,18 @@ namespace BlazorComponentPOC.Components
 
             var type = typeof(TRow);
 
-            var sortProperty = type.GetProperty(_columnSortInfo[0].ColumnName);
+            var columnToSort = type.GetProperty(_columnSortInfo[0].ColumnName);
 
 
             foreach (var sortInfo in _columnSortInfo.OrderBy(x => x.SortOrder))
             {
                 if (sortInfo.SortDirection == "ASC")
                 {
-                    Datasource = Datasource.OrderBy(x => sortProperty.GetValue(x, null)).ToList();
+                    Datasource = Datasource.OrderBy(column => columnToSort.GetValue(column, null)).ToList();
                 }
                 if (sortInfo.SortDirection == "DESC")
                 {
-                    Datasource = Datasource.OrderByDescending(x => sortProperty.GetValue(x)).ToList();
+                    Datasource = Datasource.OrderByDescending(x => columnToSort.GetValue(x)).ToList();
                 }
             }
             _columnNames = null;

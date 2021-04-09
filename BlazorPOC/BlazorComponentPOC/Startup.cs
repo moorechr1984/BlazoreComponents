@@ -28,7 +28,6 @@ namespace BlazorComponentPOC
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddTransient<StoreOrderService>();
         }
 
